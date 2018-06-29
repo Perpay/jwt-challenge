@@ -1,8 +1,15 @@
 __author__ = 'arikmisler'
-from flask import Flask
-from flask_jwt import JWT, jwt_required, current_identity
+from flask import Flask, jsonify, request
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    jwt_refresh_token_required, create_refresh_token,
+    get_jwt_identity
+)
+
+
 from werkzeug.security import safe_str_cmp
 import json
+from datetime import *
 
 class User(object):
     def __init__(self, id, username, password):
@@ -31,33 +38,82 @@ def identity(payload):
 
 app = Flask(__name__)
 app.debug = True
-app.config['SECRET_KEY'] = 'super-perpay-secret'
+app.config['JWT_SECRET_KEY'] = 'super-perpay-secret'
+app.config['JWT_AUTH_ENDPOINT'] = '/v1/auth'
+app.config['JWT_AUTH_USERNAME_KEY'] = 'email'
+app.config['JWT_AUTH_PASSWORD_KEY'] = 'password'
+app.config['JWT_HEADER_NAME'] = 'Authorization'
+app.config['JWT_HEADER_TYPE'] = 'Bearer'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(hours=1)
 
-jwt = JWT(app, authenticate, identity)
 
-@app.route('/api/v1/transactions')
-@jwt_required()
-def protected():
-    data = {[{"type":"order", "amount": 1000, "id": 1 },
+jwt = JWTManager(app)
+
+
+@app.route('/v1/auth', methods=['POST'])
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    username = request.json.get('email', None)
+    password = request.json.get('password', None)
+    try:
+        user = authenticate(username, password)
+        if not user:
+            return jsonify({"msg": "Invalid Credentials"}), 400
+    except:
+        return jsonify({"msg": "Invalid Credentialsr"}), 400
+
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+
+
+    # Identity can be any data that is json serializable
+    ret = {
+        'access_token': create_access_token(identity=username),
+        'refresh_token': create_refresh_token(identity=username)
+    }
+    return jsonify(ret), 200
+
+@app.route('/v1/auth-refresh', methods=['POST'])
+@jwt_refresh_token_required
+def refresh():
+    current_user = get_jwt_identity()
+    ret = {
+        'access_token': create_access_token(identity=current_user)
+    }
+    return jsonify(ret), 200
+
+
+@app.route('/v1/transactions')
+@jwt_required
+def transactions():
+    data = [{"type":"order", "amount": 1000, "id": 1 },
             {"type":"order", "amount": 500, "id": 12 },
-            {"type":"deposit", "amount": 100, "id": 1102 }]}
-    return json.dumps(data)
+            {"type":"deposit", "amount": 100, "id": 1102 }]
+    return jsonify(data)
 
-@app.route('/api/v1//credit_summaries')
-@jwt_required()
-def protected():
+@app.route('/v1/credit_summaries')
+@jwt_required
+def credit_summaries():
     data = {
             "borrower_status": "good",
             "outstanding_task": None
             }
-    return '%s' % current_identity
+    return jsonify(data), 200
 
-@app.route('/api/v1//power_breakdowns')
-@jwt_required()
-def protected():
+@app.route('/v1/power_breakdowns')
+@jwt_required
+def power_breakdowns():
     data = {"purchasing_power":690.0,"credit_limit":690.0,"available_credit":690.0,"cash_balance":0.0,
             "credits":{"highest_potential":0.0,"required_minimum":0.0,"expiring_soon":None}}
-    return json.dumps(data)
+    return jsonify(data), 200
+
+
+
 
 if __name__ == '__main__':
     app.run()

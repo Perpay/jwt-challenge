@@ -1,2 +1,2 @@
 Flask
-Flask-JWT
+flask-jwt-extended
