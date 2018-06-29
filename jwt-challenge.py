@@ -95,7 +95,7 @@ def crossdomain(origin=None, methods=None, headers=None,
 
 
 
-@app.route('/v1/auth', methods=['POST'])
+@app.route('/v1/auth/', methods=['POST','OPTIONS'])
 @crossdomain(origin='*')
 def login():
     if not request.is_json:
@@ -125,7 +125,7 @@ def login():
     }
     return jsonify(ret), 200
 
-@app.route('/v1/auth-refresh', methods=['POST'])
+@app.route('/v1/auth-refresh/', methods=['POST','OPTIONS'])
 @crossdomain(origin='*')
 @jwt_refresh_token_required
 def refresh():
@@ -136,7 +136,7 @@ def refresh():
     return jsonify(ret), 200
 
 
-@app.route('/v1/transactions')
+@app.route('/v1/transactions/', methods=['GET','OPTIONS'])
 @crossdomain(origin='*')
 @jwt_required
 def transactions():
@@ -145,7 +145,7 @@ def transactions():
             {"type":"deposit", "amount": 100, "id": 1102 }]
     return jsonify(data)
 
-@app.route('/v1/credit_summaries')
+@app.route('/v1/credit_summaries/', methods=['GET','OPTIONS'])
 @crossdomain(origin='*')
 @jwt_required
 def credit_summaries():
@@ -155,7 +155,7 @@ def credit_summaries():
             }
     return jsonify(data), 200
 
-@app.route('/v1/power_breakdowns')
+@app.route('/v1/power_breakdowns/', methods=['GET','OPTIONS'])
 @crossdomain(origin='*')
 @jwt_required
 def power_breakdowns():
