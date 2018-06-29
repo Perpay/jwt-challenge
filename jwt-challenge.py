@@ -58,17 +58,19 @@ def login():
 
     username = request.json.get('email', None)
     password = request.json.get('password', None)
-    try:
-        user = authenticate(username, password)
-        if not user:
-            return jsonify({"msg": "Invalid Credentials"}), 400
-    except:
-        return jsonify({"msg": "Invalid Credentialsr"}), 400
-
+    
     if not username:
         return jsonify({"msg": "Missing username parameter"}), 400
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
+    try:
+        user = authenticate(username, password)
+        if not user:
+            return jsonify({"msg": "Invalid Credentials"}), 401
+    except:
+        return jsonify({"msg": "Invalid Credentials"}), 401
+
+
 
 
     # Identity can be any data that is json serializable
