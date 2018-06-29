@@ -97,8 +97,7 @@ def crossdomain(origin=None, methods=None, headers=None,
 
 
 @app.route('/v1/auth/', methods=['POST','OPTIONS'])
-@cross_origin(allow_headers=['*'])
-@crossdomain(origin='*')
+@cross_origin(allow_headers='*')
 def login():
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
