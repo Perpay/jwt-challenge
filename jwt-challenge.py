@@ -6,7 +6,7 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 from functools import update_wrapper
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 
 from werkzeug.security import safe_str_cmp
@@ -97,7 +97,7 @@ def crossdomain(origin=None, methods=None, headers=None,
 
 
 @app.route('/v1/auth/', methods=['POST','OPTIONS'])
-@cross_origin(allow_headers=['Content-Type'])
+@cross_origin(allow_headers=['*'])
 @crossdomain(origin='*')
 def login():
     if not request.is_json:
