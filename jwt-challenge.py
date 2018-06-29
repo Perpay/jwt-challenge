@@ -6,6 +6,7 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 from functools import update_wrapper
+from flask_cors import CORS
 
 
 from werkzeug.security import safe_str_cmp
@@ -50,7 +51,7 @@ app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(hours=1)
 
 
 jwt = JWTManager(app)
-
+CORS(app)
 
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
