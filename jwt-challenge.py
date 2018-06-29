@@ -51,7 +51,7 @@ app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(hours=1)
 
 
 jwt = JWTManager(app)
-CORS(app)
+CORS(app, resources=r'/v1/*')
 
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
@@ -97,6 +97,7 @@ def crossdomain(origin=None, methods=None, headers=None,
 
 
 @app.route('/v1/auth/', methods=['POST','OPTIONS'])
+@cross_origin(allow_headers=['Content-Type'])
 @crossdomain(origin='*')
 def login():
     if not request.is_json:
