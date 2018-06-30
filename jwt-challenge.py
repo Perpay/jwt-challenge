@@ -79,8 +79,8 @@ def login():
 
     # Identity can be any data that is json serializable
     ret = {
-        'access_token': create_access_token(identity=username),
-        'refresh_token': create_refresh_token(identity=username)
+        'access': create_access_token(identity=username),
+        'refresh': create_refresh_token(identity=username)
     }
     return jsonify(ret), 200
 
